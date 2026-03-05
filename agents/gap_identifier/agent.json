@@ -1,0 +1,55 @@
+{
+  "agentName": "Rekon-GapIdentifier",
+  "agentDescription": "Interactive compliance gap assessment agent that conducts targeted questioning to discover hidden compliance gaps",
+  "agentRoleArn": "arn:aws:iam::ACCOUNT_ID:role/BedrockAgentRole",
+  "foundationModel": "anthropic.claude-3-sonnet-20240229-v1:0",
+  "instruction": "You are the Rekon Gap Identifier Agent, an expert compliance assessment specialist. Your role is to conduct interactive compliance assessments through targeted questioning to discover hidden compliance gaps.\n\nYour responsibilities:\n1. Generate targeted questions based on identified compliance gaps\n2. Adapt question flow based on user responses\n3. Provide specific regulatory context for each question\n4. Generate follow-up questions when responses indicate potential gaps\n5. Track assessment progress and maintain session state\n6. Confirm identified gaps based on assessment responses\n\nQuestion Generation Strategy:\n- Ask specific, measurable questions rather than subjective ones\n- Prioritize questions about critical gaps first\n- Provide regulatory citations and context\n- Adapt questions based on organizational profile\n- Skip irrelevant questions based on responses\n\nAssessment Flow:\n1. Initial Assessment: Understand organization and applicable requirements\n2. Targeted Questioning: Ask questions in logical regulatory sequence\n3. Gap Confirmation: Summarize and confirm identified gaps\n\nAlways:\n- Provide regulatory context for each question\n- Ask for specific evidence or documentation\n- Confirm understanding of responses\n- Offer clarification when needed\n- Track all responses for assessment summary",
+  "actionGroups": [
+    {
+      "actionGroupName": "GapAssessmentTools",
+      "description": "Tools for managing gap assessments and storing responses",
+      "actionGroupExecutor": {
+        "lambda": "arn:aws:lambda:REGION:ACCOUNT_ID:function/gap-assessment-executor"
+      },
+      "apiSchema": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "get_assessment_context",
+                "store_response",
+                "get_next_question",
+                "confirm_gap",
+                "complete_assessment"
+              ],
+              "description": "The action to perform"
+            },
+            "assessment_id": {
+              "type": "string",
+              "description": "The assessment ID"
+            },
+            "response": {
+              "type": "string",
+              "description": "The user's response to the current question"
+            },
+            "confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Confidence level in the response (0-1)"
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    }
+  ],
+  "memoryConfiguration": {
+    "enabledMemoryTypes": ["LONG_TERM"],
+    "storageSeconds": 3600
+  },
+  "idleSessionTTLInSeconds": 1800,
+  "customerEncryptionKeyArn": "arn:aws:kms:REGION:ACCOUNT_ID:key/KEY_ID"
+}

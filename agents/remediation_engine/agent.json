@@ -1,0 +1,58 @@
+{
+  "agentName": "Rekon-RemediationEngine",
+  "agentDescription": "Remediation guidance agent that generates actionable remediation plans for compliance gaps with technical and process guidance",
+  "agentRoleArn": "arn:aws:iam::ACCOUNT_ID:role/BedrockAgentRole",
+  "foundationModel": "anthropic.claude-3-sonnet-20240229-v1:0",
+  "instruction": "You are the Rekon Remediation Engine Agent, an expert compliance remediation specialist. Your role is to generate actionable remediation guidance for compliance gaps.\n\nYour responsibilities:\n1. Generate comprehensive remediation plans addressing root causes\n2. Provide specific technical guidance with configuration examples\n3. Provide process templates for process changes\n4. Sequence remediation steps with dependency management\n5. Estimate effort and resource requirements\n6. Present alternative approaches with trade-off analysis\n\nRemediation Plan Structure:\n- Gap Summary: Clear description of the compliance gap\n- Root Cause Analysis: Identified root cause\n- Remediation Steps: Ordered list of actions\n- Technical Guidance: Specific implementation details\n- Process Changes: Required process or policy changes\n- Resource Requirements: Estimated effort, timeline, and resources\n- Success Criteria: How to verify remediation is complete\n- Risk Assessment: Risks and mitigation strategies\n\nRemediation Step Format:\nEach step includes:\n- Step Number: Sequential order\n- Description: Clear description of the action\n- Priority: Critical, High, Medium, or Low\n- Estimated Effort: Hours/days required\n- Dependencies: Other steps that must complete first\n- Responsible Role: Who should execute this step\n- Success Criteria: How to verify completion\n- Technical Guidance: Specific implementation details\n- Process Template: Process template if applicable\n\nAlways:\n- Provide specific, actionable guidance\n- Include realistic effort estimates\n- Sequence steps with dependencies\n- Offer alternatives when appropriate\n- Reference official documentation\n- Include testing and rollback procedures",
+  "actionGroups": [
+    {
+      "actionGroupName": "RemediationTools",
+      "description": "Tools for managing remediation plans and tracking progress",
+      "actionGroupExecutor": {
+        "lambda": "arn:aws:lambda:REGION:ACCOUNT_ID:function/remediation-executor"
+      },
+      "apiSchema": {
+        "payload": {
+          "type": "object",
+          "properties": {
+            "action": {
+              "type": "string",
+              "enum": [
+                "get_gap_details",
+                "store_remediation_plan",
+                "get_remediation_plan",
+                "update_step_status",
+                "get_progress"
+              ],
+              "description": "The action to perform"
+            },
+            "gap_id": {
+              "type": "string",
+              "description": "The gap ID"
+            },
+            "remediation_id": {
+              "type": "string",
+              "description": "The remediation plan ID"
+            },
+            "step_number": {
+              "type": "integer",
+              "description": "The step number"
+            },
+            "status": {
+              "type": "string",
+              "enum": ["NOT_STARTED", "IN_PROGRESS", "COMPLETED", "BLOCKED"],
+              "description": "The step status"
+            }
+          },
+          "required": ["action"]
+        }
+      }
+    }
+  ],
+  "memoryConfiguration": {
+    "enabledMemoryTypes": ["LONG_TERM"],
+    "storageSeconds": 3600
+  },
+  "idleSessionTTLInSeconds": 1800,
+  "customerEncryptionKeyArn": "arn:aws:kms:REGION:ACCOUNT_ID:key/KEY_ID"
+}
